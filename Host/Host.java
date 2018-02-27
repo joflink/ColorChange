@@ -20,14 +20,12 @@ public class Host {
 
 
    Host MyCon=new Host();
-  // MyCon.GetData();
  
  }
 
 public Host()
  {
   CreateServer();
- 	//BuildIntroInterface();
 }
 
 public void CreateServer(){
@@ -58,7 +56,8 @@ String hostip= server.getInetAddress().getLocalHost().getHostAddress();
 }
 
 
-
+static JFrame f;
+static JPanel Boxpanel;
 /**
 *Bygger upp interfacet med hjälp av tre avdelningar, labels till vänster, textfält och knapp till höger och utskriftsruta i botten.
 * Fyller man i ett nytt ,meddelande och klickar på knappen för att addera det så läggs det in i databasen via Inputdata metoden.
@@ -66,7 +65,7 @@ String hostip= server.getInetAddress().getLocalHost().getHostAddress();
  */
 private void BuildInterface(String hostadress){
 
- JFrame f = new JFrame("Klient");
+  f = new JFrame("Klient");
  f.setSize(500, 500);
  f.setLocation(300,200);
   JLabel Ladress = new JLabel("IP adress (delas till klienterna): ");
@@ -75,41 +74,8 @@ private void BuildInterface(String hostadress){
  JPanel labelPane = new JPanel(new GridLayout(1,2));
  labelPane.add(Ladress);
  labelPane.add(Fadress);
+  Boxpanel= new JPanel(new GridLayout(3,3));
  f.add(labelPane, BorderLayout.NORTH);
- /* JTextArea textArea;
- JLabel Ldes = new JLabel("Skriv en kommentar nedan:");
- JButton button = new JButton("Fungerar");
- JButton green = new JButton("Fungerar");
- JButton yellow = new JButton("Halvt");
- JButton red = new JButton("Inte alls");
- textArea = new JTextArea(10, 40);
-green.setBackground(Color.GREEN);
-yellow.setBackground(Color.YELLOW);
-red.setBackground(Color.RED);
-
- JPanel fieldPane = new JPanel(new GridLayout(0,1));
-// fieldPane.add(button);
- fieldPane.add(Ldes);
-fieldPane.add(textArea);
- JPanel bottPane = new JPanel(new GridLayout(1,3));
-
-
- bottPane.add(red);
- bottPane.add(yellow);
-  bottPane.add(green);
- //f.add(labelPane, BorderLayout.NORTH);
- f.add(fieldPane, BorderLayout.SOUTH);
- f.add(bottPane, BorderLayout.CENTER); 
-
- button.addActionListener(new ActionListener() {
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-
-    //SendMail(Fmailto.getText(),Fmailfrom.getText(),Fsubject.getText(),textArea.getText(),Fserver.getText(),Fnamn.getText(),Fpass.getText());
-  }
-});
-*/
  f.setVisible(true);
 }
 
@@ -124,6 +90,7 @@ class ClientHandler  extends Thread {
   private static HashSet<PrintWriter> writers = new HashSet<PrintWriter>();
   PrintWriter writer;
   int id=0;
+  String Namn;
   static int activetasks=0; 
   static int idcount=0;
   public ClientHandler (Socket inputsocket, String Hadress) {
@@ -150,7 +117,17 @@ class ClientHandler  extends Thread {
   String msg;
   try {
     while ((msg = reader.readLine()) != null) {
-      WriteToTasks(id+": "+msg);
+   String[] Splitted= msg.split(":");
+   if (Splitted.length==2) {
+     
+    Namn= Splitted[1];
+    CreateButton(Splitted[1],true);
+   }
+else{
+
+    CreateButton(msg,false);
+      WriteToTasks(Namn+": "+msg);
+}
 
     }
   } catch (IOException ex) {
@@ -194,6 +171,25 @@ private void WriteToTasks(String message){
   write.println(message);
 }
 }
+ public JButton button;
+private void CreateButton(String Medd,boolean first){
+  if (first==true) {
+       button = new JButton(Namn);
+ Host.Boxpanel.add(button);
+Host.f.add( Host.Boxpanel, BorderLayout.SOUTH);
+  }
+  else if (Medd=="yellow") {
+ button.setBackground(Color.YELLOW);
+  }
+    else if (Medd=="green") {
+ button.setBackground(Color.GREEN);
+  }
+    else if (Medd=="red") {
+ button.setBackground(Color.RED);
+  }
+writer.println(Medd);
+SwingUtilities.updateComponentTreeUI(Host.f);
+}
 
 /**
  *Meddelar alla användare att en ny har anslutit sig.
@@ -204,3 +200,15 @@ private void NewTaskJoin()
   WriteToTasks(Activetasks());
 } 
 }
+
+/*
+public void AddClient(){
+
+   System.out.println("Cleint add");
+   JButton button = new JButton("Namn");
+ button.setBackground(Color.GREEN);
+Boxpanel.add(button);
+f.add( Boxpanel, BorderLayout.SOUTH);
+SwingUtilities.updateComponentTreeUI(f);
+}
+*/

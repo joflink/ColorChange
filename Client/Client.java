@@ -74,7 +74,7 @@ private void SendToHost(String Message){
        // System.out.println("Just connected to " + client.getRemoteSocketAddress());
         PrintWriter  out = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), "ISO-8859-1"), true);
   //  BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
- String  sendMessage=Name+"|"+Message;   
+ String  sendMessage=Message;//Name+"|"+Message;   
          out.println(sendMessage);       // skickar meddelandet till servern
         out.flush();                    //            
     
@@ -94,7 +94,7 @@ private void ConnectToServer(String serverName){
       try {
          System.out.println("Connecting to " + serverName + " on port " + port);
           client = new Socket(serverName, port);
-
+          SendToHost("N:"+Name);
       } catch (IOException e) {
          e.printStackTrace();
          System.exit(0);
