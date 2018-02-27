@@ -28,7 +28,7 @@ public Client()
  	BuildIntroInterface();
   // BuildInterface();
 }
-
+public String Name="";
 private void BuildIntroInterface(){
 
  JFrame f = new JFrame("Logga in");
@@ -57,38 +57,44 @@ private void BuildIntroInterface(){
   @Override
   public void actionPerformed(ActionEvent e) {
   	f.setVisible(false);
-ConnectToServer(Fserver.getText());
+Name= Fmail.getText();
 BuildInterface();
+ConnectToServer(Fserver.getText());
     //SendMail(Fmailto.getText(),Fmailfrom.getText(),Fsubject.getText(),textArea.getText(),Fserver.getText(),Fnamn.getText(),Fpass.getText());
   }
 });
  f.setVisible(true);
 }
 
+private void SendToHost(String Message){
 
+	try{
+	 new GetDataFromServer(client);
+        //Skriv till server
+       // System.out.println("Just connected to " + client.getRemoteSocketAddress());
+        PrintWriter  out = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), "ISO-8859-1"), true);
+  //  BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
+ String  sendMessage=Name+"|"+Message;   
+         out.println(sendMessage);       // skickar meddelandet till servern
+        out.flush();                    //            
+    
+}
+catch(Exception e)
+{
+ System.out.println("Error" + e);
+      
+}
+
+}
+ Socket client;
 private void ConnectToServer(String serverName){
 	 //"127.0.0.1";
       int port = 2000;
 
       try {
          System.out.println("Connecting to " + serverName + " on port " + port);
-         Socket client = new Socket(serverName, port);
-        //Hämta från server
-        new GetDataFromServer(client);
-        //Skriv till server
-        System.out.println("Just connected to " + client.getRemoteSocketAddress());
-        PrintWriter  out = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), "ISO-8859-1"), true);
-    BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
- String  sendMessage;               
-     while(true)
-     {
-        sendMessage = keyRead.readLine();  // läser tangenterna 
-        out.println(sendMessage);       // skickar meddelandet till servern
-        out.flush();                    // 
-     
-      }        
-        //Tror inte den behövs, då den ska stängas automatiskt i java 7.
-        //client.close();
+          client = new Socket(serverName, port);
+
       } catch (IOException e) {
          e.printStackTrace();
          System.exit(0);
@@ -112,14 +118,15 @@ private void BuildInterface(){
  JButton green = new JButton("Fungerar");
  JButton yellow = new JButton("Halvt");
  JButton red = new JButton("Inte alls");
+ JButton send = new JButton("Skicka");
  textArea = new JTextArea(10, 40);
 green.setBackground(Color.GREEN);
 yellow.setBackground(Color.YELLOW);
 red.setBackground(Color.RED);
 
- JPanel fieldPane = new JPanel(new GridLayout(0,1));
+ JPanel fieldPane = new JPanel(new GridLayout(2,1));
 // fieldPane.add(button);
- fieldPane.add(Ldes);
+ fieldPane.add(Ldes); fieldPane.add(send);
 fieldPane.add(textArea);
  JPanel bottPane = new JPanel(new GridLayout(1,3));
 
@@ -131,14 +138,14 @@ fieldPane.add(textArea);
  f.add(fieldPane, BorderLayout.SOUTH);
  f.add(bottPane, BorderLayout.CENTER); 
 
- button.addActionListener(new ActionListener() {
-
-  @Override
-  public void actionPerformed(ActionEvent e) {
-
-    //SendMail(Fmailto.getText(),Fmailfrom.getText(),Fsubject.getText(),textArea.getText(),Fserver.getText(),Fnamn.getText(),Fpass.getText());
-  }
-});
+ red.addActionListener(new ActionListener() {  @Override
+   public void actionPerformed(ActionEvent e) {SendToHost("red"); }});
+ yellow.addActionListener(new ActionListener() {  @Override
+   public void actionPerformed(ActionEvent e) {SendToHost("yellow"); }});
+ green.addActionListener(new ActionListener() {  @Override
+   public void actionPerformed(ActionEvent e) {SendToHost("green"); }});
+ send.addActionListener(new ActionListener() {  @Override
+   public void actionPerformed(ActionEvent e) {SendToHost(textArea.getText()); }});
  f.setVisible(true);
 }
 
