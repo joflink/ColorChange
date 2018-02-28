@@ -1,9 +1,13 @@
+import java.sql.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
 import java.io.*;
 import java.util.HashSet;
+import java.util.Date;
+import java.util.*;
+import java.text.*;
 
 /**
 *Skapar en uppkoppling till en mysqldatabas och hämtar och visar upp värden i form av kommentarer, man kan lägga in egna värden. 
@@ -17,10 +21,9 @@ public class Host {
 *@param args Startargument.
  */
   public static void main (String[] args) {
-
-
+  DatabaseHandler.ConnectTobase();
+   DatabaseHandler.GetNames();
    Host MyCon=new Host();
- 
  }
 
 public Host()
@@ -61,7 +64,7 @@ static JPanel Boxpanel;
  */
 private void BuildInterface(String hostadress){
 
-  f = new JFrame("Klient");
+  f = new JFrame("Host");
  f.setSize(500, 500);
  f.setLocation(300,200);
   JLabel Ladress = new JLabel("IP adress (delas till klienterna): ");
@@ -82,6 +85,162 @@ private void BuildInterface(String hostadress){
 
 }
 
+class DatabaseHandler 
+{
+
+
+  private static HashSet<user> Users = new HashSet<user>();
+  private static HashSet<String> names = new HashSet<String>();
+  private static HashSet<Integer> timesactivelist = new HashSet<Integer>();
+public static Connection conn;
+public DatabaseHandler()
+{
+    
+}
+
+public static void ConnectTobase(){
+
+  try { 
+   Class.forName("com.mysql.jdbc.Driver").newInstance();
+   String computer = "217.78.20.215";
+   String db_name = "colorchange";
+   String username = "colorlog";
+   String password = "colorkid";
+   String url = "jdbc:mysql://" + computer + "/" + db_name;
+   try { 
+    Connection dbConnection = DriverManager.getConnection(url, username, password);
+    System.out.println("Connected to server");
+    conn= dbConnection;
+  }
+  catch(SQLException e)
+  {
+   System.out.println("Error:   "+ e);
+ }
+
+} catch (ClassNotFoundException e) {    }
+catch (InstantiationException e) {    } 
+catch (IllegalAccessException e) {    }
+
+}
+
+public static void GetNames(){
+ try { 
+
+  String query = "SELECT name, timesactive FROM elever";
+  Statement st = conn.createStatement();
+
+  ResultSet rs = st.executeQuery(query);
+
+  while (rs.next())
+  {
+    String Name = rs.getString("name");
+
+    Integer tid = rs.getInt("timesactive");
+    Users.add(new user(Name,tid));
+    System.out.println(Name+tid);
+ }
+  st.close();
+
+    System.out.println("ints set = "+timesactivelist);
+}
+catch(SQLException e)
+{
+ System.out.println("Error:   "+ e);
+}
+}
+
+
+/**
+*Tar in 4 värden (Namn, Mail,Meddelande och Hemsida) lägger sedan in dem i databasen via preparedstatement.
+*@param N står för Namn
+*@param M står för Mail 
+*@param C står för Meddelande 
+*@param H står för Hemsida  
+ */
+public void InputData(String Name){
+
+boolean nameExist= false;
+
+
+      Date date = new Date();
+      SimpleDateFormat ft =  new SimpleDateFormat ("yyyy.MM.dd");
+      String datum=ft.format(date);
+
+int ggraktiv=0;
+
+Iterator<user> iterator = Users.iterator();
+    while(iterator.hasNext()){
+      user usr = iterator.next();
+    if (usr.name.equals(Name)) {
+  nameExist=true;
+ggraktiv=usr.logins;
+ggraktiv++;
+ System.out.println("Användaren:   "+Name+ "finns");
+  break;
+}
+    }
+
+
+
+if (nameExist==true) {
+  try{
+
+ System.out.println("knans");
+      // create the java mysql update preparedstatement
+      String query = "update elever set lastactive = ?, timesactive= ? where name = ?";
+      PreparedStatement preparedStmt = conn.prepareStatement(query);
+            preparedStmt.setString(1, datum);
+      preparedStmt.setInt(2, ggraktiv);
+      preparedStmt.setString(3, Name);
+
+      // execute the java preparedstatement
+      preparedStmt.executeUpdate();
+       preparedStmt.close();
+     //conn.close();
+    }
+    catch (Exception e)
+    {
+      System.err.println("Got an exception! ");
+      System.err.println(e.getMessage());
+    }
+}
+else
+{
+ System.out.println("bamms");
+  try { 
+  // Connection conn=ConnectTobase();
+   String query = " insert into elever (name, lastactive, timesactive)"
+   + " values (?, ?, ?)";
+   PreparedStatement preparedStmt = conn.prepareStatement(query);
+   preparedStmt.setString (1, Name);
+   preparedStmt.setString (2, datum);
+   preparedStmt.setInt(3, 1);
+   preparedStmt.execute();
+
+    Users.add(new user(Name,1));
+  // conn.close();
+ preparedStmt.close();
+ }
+ catch(SQLException e)
+ {
+   System.out.println("Error:   "+ e);
+ }
+
+}
+}
+
+}
+
+class user{
+  public String name;
+  public int logins;
+  public user(String Name,int Logins)
+  {
+name=Name;
+logins=Logins;
+
+  }
+}
 
 class ClientHandler  extends Thread {
   Socket socket;
@@ -107,8 +266,11 @@ class ClientHandler  extends Thread {
    } catch (IOException e) {
    }
    NewTaskJoin();
- }
 
+   Database = new DatabaseHandler();
+
+ }
+private DatabaseHandler Database;
 
 
  @Override
@@ -175,10 +337,12 @@ private void WriteToTasks(String message){
 }
  public JButton button;
 private void CreateButton(){
+
+
   button = new JButton(Namn);
  Host.Boxpanel.add(button);
 Host.f.add( Host.Boxpanel, BorderLayout.CENTER);
-
+Database.InputData(Namn);
 SwingUtilities.updateComponentTreeUI(Host.f);
 }
 
