@@ -30,11 +30,6 @@ public Host()
 
 public void CreateServer(){
      int port= 2000;
- /*  try {
-    port = Integer.parseInt(args[0]);
-  } catch (RuntimeException ex) {
-    port = 2000;
-  }*/
 
   try (ServerSocket server = new ServerSocket(port)) {
    System.out.println("Server  ready for chatting");
@@ -58,6 +53,7 @@ String hostip= server.getInetAddress().getLocalHost().getHostAddress();
 
 static JFrame f;
 static JPanel Boxpanel;
+ static  JTextArea TInputs;
 /**
 *Bygger upp interfacet med hjälp av tre avdelningar, labels till vänster, textfält och knapp till höger och utskriftsruta i botten.
 * Fyller man i ett nytt ,meddelande och klickar på knappen för att addera det så läggs det in i databasen via Inputdata metoden.
@@ -71,11 +67,15 @@ private void BuildInterface(String hostadress){
   JLabel Ladress = new JLabel("IP adress (delas till klienterna): ");
  JTextField Fadress= new JTextField(20);
  Fadress.setText(hostadress);
+  TInputs = new JTextArea(10, 40);
  JPanel labelPane = new JPanel(new GridLayout(1,2));
+ JPanel TextPane = new JPanel(new GridLayout(0,1));
+  TextPane.add(TInputs);
  labelPane.add(Ladress);
  labelPane.add(Fadress);
-  Boxpanel= new JPanel(new GridLayout(3,3));
+  Boxpanel= new JPanel(new GridLayout(1,3));
  f.add(labelPane, BorderLayout.NORTH);
+ f.add(TextPane, BorderLayout.SOUTH);
  f.setVisible(true);
 }
 
@@ -121,12 +121,11 @@ class ClientHandler  extends Thread {
    if (Splitted.length==2) {
      
     Namn= Splitted[1];
-    CreateButton(Splitted[1],true);
+    CreateButton();
    }
 else{
 
-    CreateButton(msg,false);
-      WriteToTasks(Namn+": "+msg);
+   UppdateButton(msg);
 }
 
     }
@@ -147,6 +146,9 @@ private void killThread(){
   writers.remove(writer);
   activetasks--;
   WriteToTasks(Activetasks());
+  Container parent = button.getParent();
+parent.remove(button);
+SwingUtilities.updateComponentTreeUI(Host.f);
 
   try {writer.close();
    reader.close();
@@ -172,23 +174,34 @@ private void WriteToTasks(String message){
 }
 }
  public JButton button;
-private void CreateButton(String Medd,boolean first){
-  if (first==true) {
-       button = new JButton(Namn);
+private void CreateButton(){
+  button = new JButton(Namn);
  Host.Boxpanel.add(button);
-Host.f.add( Host.Boxpanel, BorderLayout.SOUTH);
-  }
-  else if (Medd=="yellow") {
+Host.f.add( Host.Boxpanel, BorderLayout.CENTER);
+
+SwingUtilities.updateComponentTreeUI(Host.f);
+}
+
+private void UppdateButton(String Medd)
+{
+  if (Medd!=null && !Medd.isEmpty()) {
+
+      WriteToTasks(Namn+": "+Medd);
+ if (Medd.equals("yellow")) {
  button.setBackground(Color.YELLOW);
   }
-    else if (Medd=="green") {
+    else if (Medd.equals("green")) {
  button.setBackground(Color.GREEN);
   }
-    else if (Medd=="red") {
+    else if (Medd.equals("red")) {
  button.setBackground(Color.RED);
   }
-writer.println(Medd);
-SwingUtilities.updateComponentTreeUI(Host.f);
+  else {
+    Host.TInputs.append(Namn+": "+Medd+"\n");
+  }
+ System.out.println(Medd);
+    
+  }
 }
 
 /**
@@ -200,15 +213,3 @@ private void NewTaskJoin()
   WriteToTasks(Activetasks());
 } 
 }
-
-/*
-public void AddClient(){
-
-   System.out.println("Cleint add");
-   JButton button = new JButton("Namn");
- button.setBackground(Color.GREEN);
-Boxpanel.add(button);
-f.add( Boxpanel, BorderLayout.SOUTH);
-SwingUtilities.updateComponentTreeUI(f);
-}
-*/

@@ -139,7 +139,8 @@ fieldPane.add(textArea);
  f.add(bottPane, BorderLayout.CENTER); 
 
  red.addActionListener(new ActionListener() {  @Override
-   public void actionPerformed(ActionEvent e) {SendToHost("red"); }});
+   public void actionPerformed(ActionEvent e) {SendToHost("red"); 
+}});
  yellow.addActionListener(new ActionListener() {  @Override
    public void actionPerformed(ActionEvent e) {SendToHost("yellow"); }});
  green.addActionListener(new ActionListener() {  @Override
