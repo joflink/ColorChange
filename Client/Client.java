@@ -44,13 +44,14 @@ private void BuildIntroInterface(){
  labelPane.add(Fserver);
  labelPane.add(Lmail);
  labelPane.add(Fmail);
+labelPane.setBorder(BorderFactory.createTitledBorder(
+        BorderFactory.createEtchedBorder(), "Login Panel"));
+ JPanel buttonPane = new JPanel(new GridLayout(1,3));
 
- JPanel bottPane = new JPanel(new GridLayout(1,3));
-
- bottPane.add(button);
+ buttonPane.add(button);
  
  f.add(labelPane, BorderLayout.NORTH);
- f.add(bottPane, BorderLayout.CENTER); 
+ f.add(buttonPane, BorderLayout.CENTER); 
 
  button.addActionListener(new ActionListener() {
 
@@ -88,7 +89,6 @@ catch(Exception e)
 }
  Socket client;
 private void ConnectToServer(String serverName){
-	 //"127.0.0.1";
       int port = 2000;
 
       try {
@@ -119,24 +119,36 @@ private void BuildInterface(){
  JButton yellow = new JButton("Halvt");
  JButton red = new JButton("Inte alls");
  JButton send = new JButton("Skicka");
- textArea = new JTextArea(10, 40);
+ textArea = new JTextArea(10, 60);
 green.setBackground(Color.GREEN);
 yellow.setBackground(Color.YELLOW);
 red.setBackground(Color.RED);
 
- JPanel fieldPane = new JPanel(new GridLayout(2,1));
+//yellow.setPreferredSize(new Dimension(350, 40));
+//red.setPreferredSize(new Dimension(350, 40));
+send.setPreferredSize(new Dimension(100, 100));
+ JPanel fieldPane = new JPanel(new GridLayout(1,1));
+ JPanel textPane = new JPanel(new GridLayout(0,1));
 // fieldPane.add(button);
- fieldPane.add(Ldes); fieldPane.add(send);
-fieldPane.add(textArea);
- JPanel bottPane = new JPanel(new GridLayout(1,3));
 
-
- bottPane.add(red);
- bottPane.add(yellow);
-  bottPane.add(green);
+ JPanel buttonPane = new JPanel(new GridLayout(1,3));
+buttonPane.setPreferredSize(new Dimension(100, 80));
+ fieldPane.add(Ldes); 
+textPane.add(textArea);
+textPane.setBorder(BorderFactory.createTitledBorder(
+        BorderFactory.createEtchedBorder(), "Skriv  ett meddelande till lararen har:"));
+  
+        GridBagConstraints constraints = new GridBagConstraints();
+     
+        constraints.gridheight = 2;
+textPane.add(send,constraints);
+ buttonPane.add(red);
+ buttonPane.add(yellow);
+  buttonPane.add(green);
  //f.add(labelPane, BorderLayout.NORTH);
- f.add(fieldPane, BorderLayout.SOUTH);
- f.add(bottPane, BorderLayout.CENTER); 
+ f.add(textPane, BorderLayout.SOUTH);
+ //f.add(fieldPane, BorderLayout.SOUTH);
+ f.add(buttonPane, BorderLayout.NORTH); 
 
  red.addActionListener(new ActionListener() {  @Override
    public void actionPerformed(ActionEvent e) {SendToHost("red"); 

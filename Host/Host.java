@@ -100,6 +100,11 @@ public DatabaseHandler()
 
 public static void ConnectTobase(){
 
+ Date date = new Date();
+      SimpleDateFormat ft =  new SimpleDateFormat ("yyyy.MM.dd");
+       datum=ft.format(date);
+
+
   try { 
    Class.forName("com.mysql.jdbc.Driver").newInstance();
    String computer = "217.78.20.215";
@@ -121,7 +126,9 @@ public static void ConnectTobase(){
 catch (InstantiationException e) {    } 
 catch (IllegalAccessException e) {    }
 
+ 
 }
+   public  static String datum;
 
 public static void GetNames(){
  try { 
@@ -149,6 +156,26 @@ catch(SQLException e)
 }
 }
 
+public void SaveColorchange(String Name, String value, long timelength){
+
+ try { 
+   String query = " insert into tider (name,value, timelength, date)"
+   + " values (?, ?, ?, ?)";
+   PreparedStatement preparedStmt = conn.prepareStatement(query);
+   preparedStmt.setString (1, Name);
+   preparedStmt.setString (2, value);
+   preparedStmt.setLong(3, timelength);
+   preparedStmt.setString(4, datum);
+   preparedStmt.execute();
+ preparedStmt.close();
+
+  System.out.println("namn,tid: "+Name+timelength);
+ }
+ catch(SQLException e)
+ {
+   System.out.println("Error:   "+ e);
+ }
+}
 
 /**
 *Tar in 4 värden (Namn, Mail,Meddelande och Hemsida) lägger sedan in dem i databasen via preparedstatement.
@@ -162,9 +189,6 @@ public void InputData(String Name){
 boolean nameExist= false;
 
 
-      Date date = new Date();
-      SimpleDateFormat ft =  new SimpleDateFormat ("yyyy.MM.dd");
-      String datum=ft.format(date);
 
 int ggraktiv=0;
 
@@ -180,12 +204,8 @@ ggraktiv++;
 }
     }
 
-
-
 if (nameExist==true) {
   try{
-
- System.out.println("knans");
       // create the java mysql update preparedstatement
       String query = "update elever set lastactive = ?, timesactive= ? where name = ?";
       PreparedStatement preparedStmt = conn.prepareStatement(query);
@@ -206,7 +226,6 @@ if (nameExist==true) {
 }
 else
 {
- System.out.println("bamms");
   try { 
   // Connection conn=ConnectTobase();
    String query = " insert into elever (name, lastactive, timesactive)"
@@ -271,7 +290,7 @@ class ClientHandler  extends Thread {
 
  }
 private DatabaseHandler Database;
-
+long startTime = System.currentTimeMillis();
 
  @Override
  public void run() {
@@ -363,10 +382,18 @@ private void UppdateButton(String Medd)
   else {
     Host.TInputs.append(Namn+": "+Medd+"\n");
   }
- System.out.println(Medd);
-    
-  }
+
+long time=getAgeInSeconds();
+  Database.SaveColorchange(Namn,Medd,time);
 }
+}
+
+public long getAgeInSeconds() {
+        long nowMillis = System.currentTimeMillis();
+        long output=((nowMillis - startTime) / 1000);
+     startTime=System.currentTimeMillis();
+    return output;
+    }
 
 /**
  *Meddelar alla användare att en ny har anslutit sig.
