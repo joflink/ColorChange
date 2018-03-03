@@ -15,18 +15,25 @@ public class Client {
 *Skapar en instans av MydatabaseConnection och kör GetData metoden för att hämta värden.
 *@param args Startargument.
  */
-  public static void main (String[] args) {
+public static void main (String[] args) {
 
+  Runtime.getRuntime().addShutdownHook(new Thread(){public void run(){
+   try {
+    client.close();
+    System.out.println("Dis Connect!");
+    System.exit(0);
+  } catch (Exception e) {System.out.println("Error" + e); }
+}});
 
-   Client MyCon=new Client();
+  Client MyCon=new Client();
+
   // MyCon.GetData();
- 
- }
+  
+}
 
 public Client()
- {
- 	BuildIntroInterface();
-  // BuildInterface();
+{
+  BuildIntroInterface();
 }
 public String Name="";
 private void BuildIntroInterface(){
@@ -44,8 +51,8 @@ private void BuildIntroInterface(){
  labelPane.add(Fserver);
  labelPane.add(Lmail);
  labelPane.add(Fmail);
-labelPane.setBorder(BorderFactory.createTitledBorder(
-        BorderFactory.createEtchedBorder(), "Login Panel"));
+ labelPane.setBorder(BorderFactory.createTitledBorder(
+  BorderFactory.createEtchedBorder(), "Login Panel"));
  JPanel buttonPane = new JPanel(new GridLayout(1,3));
 
  buttonPane.add(button);
@@ -58,9 +65,9 @@ labelPane.setBorder(BorderFactory.createTitledBorder(
   @Override
   public void actionPerformed(ActionEvent e) {
   	f.setVisible(false);
-Name= Fmail.getText();
-BuildInterface();
-ConnectToServer(Fserver.getText());
+    Name= Fmail.getText();
+    BuildInterface();
+    ConnectToServer(Fserver.getText());
     //SendMail(Fmailto.getText(),Fmailfrom.getText(),Fsubject.getText(),textArea.getText(),Fserver.getText(),Fnamn.getText(),Fpass.getText());
   }
 });
@@ -70,36 +77,36 @@ ConnectToServer(Fserver.getText());
 private void SendToHost(String Message){
 
 	try{
-	 new GetDataFromServer(client);
+    new GetDataFromServer(client);
         //Skriv till server
        // System.out.println("Just connected to " + client.getRemoteSocketAddress());
-        PrintWriter  out = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), "ISO-8859-1"), true);
+    PrintWriter  out = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), "ISO-8859-1"), true);
   //  BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
  String  sendMessage=Message;//Name+"|"+Message;   
          out.println(sendMessage);       // skickar meddelandet till servern
         out.flush();                    //            
-    
-}
-catch(Exception e)
-{
- System.out.println("Error" + e);
-      
-}
-
-}
- Socket client;
-private void ConnectToServer(String serverName){
-      int port = 2000;
-
-      try {
-         System.out.println("Connecting to " + serverName + " on port " + port);
-          client = new Socket(serverName, port);
-          SendToHost("N:"+Name);
-      } catch (IOException e) {
-         e.printStackTrace();
-         System.exit(0);
+        
       }
-  }
+      catch(Exception e)
+      {
+       System.out.println("Error" + e);
+       
+     }
+
+   }
+   public static Socket client;
+   private void ConnectToServer(String serverName){
+    int port = 2000;
+
+    try {
+     System.out.println("Connecting to " + serverName + " on port " + port);
+     client = new Socket(serverName, port);
+     SendToHost("N:"+Name);
+   } catch (IOException e) {
+     e.printStackTrace();
+     System.exit(0);
+   }
+ }
 
 
 /**
@@ -110,9 +117,11 @@ private void ConnectToServer(String serverName){
 private void BuildInterface(){
 
  JFrame f = new JFrame("Klient");
+
+ f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
  f.setSize(500, 500);
  f.setLocation(300,200);
-  JTextArea textArea;
+ JTextArea textArea;
  JLabel Ldes = new JLabel("Skriv en kommentar nedan:");
  JButton button = new JButton("Fungerar");
  JButton green = new JButton("Fungerar");
@@ -120,31 +129,31 @@ private void BuildInterface(){
  JButton red = new JButton("Inte alls");
  JButton send = new JButton("Skicka");
  textArea = new JTextArea(10, 60);
-green.setBackground(Color.GREEN);
-yellow.setBackground(Color.YELLOW);
-red.setBackground(Color.RED);
+ green.setBackground(Color.GREEN);
+ yellow.setBackground(Color.YELLOW);
+ red.setBackground(Color.RED);
 
 //yellow.setPreferredSize(new Dimension(350, 40));
 //red.setPreferredSize(new Dimension(350, 40));
-send.setPreferredSize(new Dimension(100, 100));
+ send.setPreferredSize(new Dimension(100, 100));
  JPanel fieldPane = new JPanel(new GridLayout(1,1));
  JPanel textPane = new JPanel(new GridLayout(0,1));
 // fieldPane.add(button);
 
  JPanel buttonPane = new JPanel(new GridLayout(1,3));
-buttonPane.setPreferredSize(new Dimension(100, 80));
+ buttonPane.setPreferredSize(new Dimension(100, 80));
  fieldPane.add(Ldes); 
-textPane.add(textArea);
-textPane.setBorder(BorderFactory.createTitledBorder(
-        BorderFactory.createEtchedBorder(), "Skriv  ett meddelande till lararen har:"));
-  
-        GridBagConstraints constraints = new GridBagConstraints();
-     
-        constraints.gridheight = 2;
-textPane.add(send,constraints);
+ textPane.add(textArea);
+ textPane.setBorder(BorderFactory.createTitledBorder(
+  BorderFactory.createEtchedBorder(), "Skriv  ett meddelande till lararen har:"));
+ 
+ GridBagConstraints constraints = new GridBagConstraints();
+ 
+ constraints.gridheight = 2;
+ textPane.add(send,constraints);
  buttonPane.add(red);
  buttonPane.add(yellow);
-  buttonPane.add(green);
+ buttonPane.add(green);
  //f.add(labelPane, BorderLayout.NORTH);
  f.add(textPane, BorderLayout.SOUTH);
  //f.add(fieldPane, BorderLayout.SOUTH);
@@ -152,7 +161,7 @@ textPane.add(send,constraints);
 
  red.addActionListener(new ActionListener() {  @Override
    public void actionPerformed(ActionEvent e) {SendToHost("red"); 
-}});
+ }});
  yellow.addActionListener(new ActionListener() {  @Override
    public void actionPerformed(ActionEvent e) {SendToHost("yellow"); }});
  green.addActionListener(new ActionListener() {  @Override
@@ -168,20 +177,20 @@ textPane.add(send,constraints);
 class GetDataFromServer extends Thread {
   Socket client;
   public GetDataFromServer(Socket input) {
-client=input;
+    client=input;
     start(); 
   }
   public void run() {
-         try { 
-           BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            String inStr="";
-               while ((inStr = in.readLine()) != null) {
-            System.out.println(inStr);
-        }
-}catch (IOException e) {
-         e.printStackTrace();
-      }
-       
-  }
+   try { 
+     BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+     String inStr="";
+     while ((inStr = in.readLine()) != null) {
+      System.out.println(inStr);
+    }
+  }catch (IOException e) {
+   e.printStackTrace();
+ }
+ 
+}
 }
 

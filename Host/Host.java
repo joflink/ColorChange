@@ -18,23 +18,36 @@ public class Host {
 
 /**
 *Skapar en instans av MydatabaseConnection och kör GetData metoden för att hämta värden.
-*@param args Startargument.
+*@param args Startargument.client
  */
   public static void main (String[] args) {
+
+Runtime.getRuntime().addShutdownHook(new Thread(){public void run(){
+     try {
+        DatabaseHandler.conn.close();
+        System.out.println("Dis Connect!");
+        server.close();
+        System.exit(0);
+    } catch (Exception e) {System.out.println("Error" + e); }
+    }});
+
   DatabaseHandler.ConnectTobase();
    DatabaseHandler.GetNames();
    Host MyCon=new Host();
+
+
  }
 
 public Host()
  {
   CreateServer();
 }
-
+static ServerSocket server;
 public void CreateServer(){
      int port= 2000;
 
-  try (ServerSocket server = new ServerSocket(port)) {
+  try {
+    server = new ServerSocket(port);
    System.out.println("Server  ready for chatting");
    String hostadress = server.getInetAddress().getLocalHost().getHostName();
 String hostip= server.getInetAddress().getLocalHost().getHostAddress();
@@ -45,12 +58,14 @@ String hostip= server.getInetAddress().getLocalHost().getHostAddress();
       Socket connection = server.accept();
       Thread task =  new ClientHandler(connection,hostadress);
       task.start();
-    } catch (IOException ex) {}
+    } catch (Exception ex) {}
   }
-} catch (IOException ex) {
+} catch (Exception ex) {
   System.err.println(ex);
+
   System.exit(0);
 }
+
 }
 
 
@@ -65,6 +80,8 @@ static JPanel Boxpanel;
 private void BuildInterface(String hostadress){
 
   f = new JFrame("Host");
+
+f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
  f.setSize(500, 500);
  f.setLocation(300,200);
   JLabel Ladress = new JLabel("IP adress (delas till klienterna): ");
@@ -289,6 +306,10 @@ class ClientHandler  extends Thread {
    Database = new DatabaseHandler();
 
  }
+
+
+
+
 private DatabaseHandler Database;
 long startTime = System.currentTimeMillis();
 
