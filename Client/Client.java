@@ -5,14 +5,14 @@ import java.net.*;
 import java.io.*;
 
 /**
-*Skapar en uppkoppling till en mysqldatabas och hämtar och visar upp värden i form av kommentarer, man kan lägga in egna värden. 
+*Skapar client där man kan välja olika färger och skicka dem samt meddelande till hosten.
   *@author  Joakim Flink
  */
 public class Client {
 
 
 /**
-*Skapar en instans av MydatabaseConnection och kör GetData metoden för att hämta värden.
+*Skapar en addShutdownHook som avslutar clietens uppkoppling till hosten om man stänger ner via X eller om det uppstår error.
 *@param args Startargument.
  */
 public static void main (String[] args) {
@@ -20,28 +20,31 @@ public static void main (String[] args) {
   Runtime.getRuntime().addShutdownHook(new Thread(){public void run(){
    try {
     client.close();
-    System.out.println("Dis Connect!");
+    System.out.println("Disconnect!");
     System.exit(0);
   } catch (Exception e) {System.out.println("Error" + e); }
 }});
 
   Client MyCon=new Client();
-
-  // MyCon.GetData();
-  
 }
-
+/**
+*Kör metoden BuildIntroInterface direkt när programmet startas.
+ */
 public Client()
 {
   BuildIntroInterface();
 }
+
 public String Name="";
+/**
+*Bygger ett interface där man får skriva in namn som ska symbolisera användaren och servern man vill konnekta tills ipaddress.
+ */
 private void BuildIntroInterface(){
 
  JFrame f = new JFrame("Logga in");
  f.setSize(200, 200);
  f.setLocation(300,200);
- JLabel Lmail = new JLabel("Mail:");
+ JLabel Lmail = new JLabel("Namn:");
  JTextField Fmail= new JTextField(20);
  JLabel Lserver = new JLabel("Server adress:");
  JTextField Fserver= new JTextField(20);
@@ -54,12 +57,9 @@ private void BuildIntroInterface(){
  labelPane.setBorder(BorderFactory.createTitledBorder(
   BorderFactory.createEtchedBorder(), "Login Panel"));
  JPanel buttonPane = new JPanel(new GridLayout(1,3));
-
  buttonPane.add(button);
- 
  f.add(labelPane, BorderLayout.NORTH);
  f.add(buttonPane, BorderLayout.CENTER); 
-
  button.addActionListener(new ActionListener() {
 
   @Override
@@ -68,23 +68,23 @@ private void BuildIntroInterface(){
     Name= Fmail.getText();
     BuildInterface();
     ConnectToServer(Fserver.getText());
-    //SendMail(Fmailto.getText(),Fmailfrom.getText(),Fsubject.getText(),textArea.getText(),Fserver.getText(),Fnamn.getText(),Fpass.getText());
   }
 });
  f.setVisible(true);
 }
 
+/**
+*Skapar en connection till hosten och skickar meddelandet man valt.
+*@param Message Meddelandet som ska skickas till hosten, det är antingen den färgen man trycker på eller det meddelandet man skirver in.
+ */
 private void SendToHost(String Message){
 
 	try{
     new GetDataFromServer(client);
-        //Skriv till server
-       // System.out.println("Just connected to " + client.getRemoteSocketAddress());
     PrintWriter  out = new PrintWriter(new OutputStreamWriter(client.getOutputStream(), "ISO-8859-1"), true);
-  //  BufferedReader keyRead = new BufferedReader(new InputStreamReader(System.in));
- String  sendMessage=Message;//Name+"|"+Message;   
-         out.println(sendMessage);       // skickar meddelandet till servern
-        out.flush();                    //            
+ String  sendMessage=Message;  
+         out.println(sendMessage);      
+        out.flush();                   
         
       }
       catch(Exception e)
@@ -95,6 +95,10 @@ private void SendToHost(String Message){
 
    }
    public static Socket client;
+   /**
+*Skapar en koppling till serven på port 2000.Skickar sedan det valda användarnamnet som startmeddelande.
+*@param serverName ip adressen till servern man vill ansluta till.
+ */
    private void ConnectToServer(String serverName){
     int port = 2000;
 
@@ -110,9 +114,8 @@ private void SendToHost(String Message){
 
 
 /**
-*Bygger upp interfacet med hjälp av tre avdelningar, labels till vänster, textfält och knapp till höger och utskriftsruta i botten.
-* Fyller man i ett nytt ,meddelande och klickar på knappen för att addera det så läggs det in i databasen via Inputdata metoden.
-*Utskriftsfältet populeras av alla befintliga värden i databasen via GetData metoden.
+*Bygger upp interfacet med tre knappar, en grön, en gul och en röd samt en textarea med skicka knapp. Meddelandet skickar när man trycker
+* på någon av knapparna, då är det olika meddelanden med beroende på vad man trycker.
  */
 private void BuildInterface(){
 
@@ -132,14 +135,9 @@ private void BuildInterface(){
  green.setBackground(Color.GREEN);
  yellow.setBackground(Color.YELLOW);
  red.setBackground(Color.RED);
-
-//yellow.setPreferredSize(new Dimension(350, 40));
-//red.setPreferredSize(new Dimension(350, 40));
  send.setPreferredSize(new Dimension(100, 100));
  JPanel fieldPane = new JPanel(new GridLayout(1,1));
  JPanel textPane = new JPanel(new GridLayout(0,1));
-// fieldPane.add(button);
-
  JPanel buttonPane = new JPanel(new GridLayout(1,3));
  buttonPane.setPreferredSize(new Dimension(100, 80));
  fieldPane.add(Ldes); 
@@ -154,9 +152,7 @@ private void BuildInterface(){
  buttonPane.add(red);
  buttonPane.add(yellow);
  buttonPane.add(green);
- //f.add(labelPane, BorderLayout.NORTH);
  f.add(textPane, BorderLayout.SOUTH);
- //f.add(fieldPane, BorderLayout.SOUTH);
  f.add(buttonPane, BorderLayout.NORTH); 
 
  red.addActionListener(new ActionListener() {  @Override
@@ -173,9 +169,15 @@ private void BuildInterface(){
 
 
 }
-
+/**
+*Skapar subklass till Thread som får in en socket och skickar meddelanden som klickas på.
+ */
 class GetDataFromServer extends Thread {
   Socket client;
+  /**
+*Skapar skickar meddelanden till servern.
+*@param input Socketen som skickas in.
+ */
   public GetDataFromServer(Socket input) {
     client=input;
     start(); 
